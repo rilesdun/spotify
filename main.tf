@@ -14,7 +14,7 @@ provider "spotify" {
   api_key = var.spotify_api_key
 }
 
-resource "spotify_playlist" "metal_playlist" {
+resource "spotify_playlist" "programmatic_playlist" {
   name        = "Programmatic Playlist"
   description = "This playlist was created & managed by Terraform"
   public      = true
