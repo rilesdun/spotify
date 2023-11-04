@@ -1,4 +1,7 @@
-# Create a Spotify Playlist with Terraform
+# Create a Custom Spotify Playlist with Terraform
 
-This repo is a companion repo to the [Create a Spotify Playlist with Terraform](https://developer.hashicorp.com/terraform/tutorials/community-providers/spotify-playlist) tutorial.
-It contains Terraform configuration you can use to learn how to create a playlist on Spotify.
+This repository is an extension of the [Create a Spotify Playlist with Terraform](https://developer.hashicorp.com/terraform/tutorials/community-providers/spotify-playlist) tutorial. 
+
+It contains Terraform configuration that I have customized to create my own Spotify playlist.
+
+Feel free to explore the code and use it as a reference for creating your own custom Spotify playlists using Terraform.
