@@ -2,10 +2,21 @@
 # SPDX-License-Identifier: MPL-2.0
 
 terraform {
+  backend "s3" {
+    bucket = "spotify-state-bucket"
+    key    = "terraform.tfstate"
+    region = "ca-central-1"
+    dynamodb_table = "spotify_state_locks"
+    encrypt = true
+  }
   required_providers {
     spotify = {
       version = "~> 0.2.6"
       source  = "conradludgate/spotify"
+    }
+    aws = {
+      version = "~> 5.0"
+      source  = "hashicorp/aws"
     }
   }
 }
@@ -14,9 +25,57 @@ provider "spotify" {
   api_key = var.spotify_api_key
 }
 
+provider "aws" {
+  region = "ca-central-1"
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_access_key
+}
+
+resource "aws_s3_bucket_versioning" "enabled" {
+  bucket = aws_s3_bucket.spotify-state-bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
+  bucket = aws_s3_bucket.spotify-state-bucket.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "public_access" {
+  bucket = aws_s3_bucket.spotify-state-bucket.id
+  block_public_acls = true
+  block_public_policy = true
+  ignore_public_acls = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket" "spotify-state-bucket" {
+  bucket = "spotify-state-bucket"
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "aws_dynamodb_table" "terraform_locks" {
+  name           = "spotify_state_locks"
+  billing_mode   = "PAY_PER_REQUEST"
+  hash_key       = "LockID"
+  attribute {
+    name = "LockID"
+    type = "S"
+  }
+}
+
 resource "spotify_playlist" "programmatic_playlist" {
   name        = "Programmatic Playlist"
-  description = "This playlist was created & managed by Terraform"
+  description = "This playlist was created and managed by Terraform"
   public      = true
 
   tracks = flatten([
